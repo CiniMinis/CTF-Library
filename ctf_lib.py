@@ -69,7 +69,7 @@ class Challenge:
 			try:
 				server_sock.listen(1)
 				client_sock, address = server_sock.accept()
-				print "[*] %s conected [*]" % address[0]
+				print "[*] %s connected [*]" % address[0]
 				threading.Thread(target=self.__handle_client, args=(
 					client_sock, address,)).start()
 			except socket.timeout:
@@ -100,7 +100,7 @@ class Challenge:
 	@property
 	def id(self):
 		"""
-		Retrives the challenge id
+		Retrieves the challenge id
 		
 		Returns:
 			int: The challenge id
@@ -110,7 +110,7 @@ class Challenge:
 	@property
 	def name(self):
 		"""
-		Retrives the challenge's name
+		Retrieves the challenge's name
 		
 		Returns:
 			str: The challenge's name
@@ -130,7 +130,7 @@ class Challenge:
 	@property
 	def pts(self):
 		"""
-		Retrives the challenge's points
+		Retrieves the challenge's points
 		
 		Returns:
 			int: The point worth of the challenge
@@ -150,7 +150,7 @@ class Challenge:
 	@property
 	def port(self):
 		"""
-		Retrives the challenge's port
+		Retrieves the challenge's port
 		
 		Returns:
 			int: The port on which the challenge is hosted
@@ -160,7 +160,7 @@ class Challenge:
 	@property
 	def flag(self):
 		"""
-		Retrives the challenge's flag
+		Retrieves the challenge's flag
 		
 		Returns:
 			str: The flag required to beat the challenge
@@ -170,7 +170,7 @@ class Challenge:
 	@property
 	def ip(self):
 		"""
-		Retrives the challenge's ip
+		Retrieves the challenge's ip
 		
 		Returns:
 			str: The ip of the challenge server
@@ -180,7 +180,7 @@ class Challenge:
 	@property
 	def win_func(self):
 		"""
-		Retrives the challenge's main function
+		Retrieves the challenge's main function
 		
 		Returns:
 			function: The function with which players play
@@ -190,7 +190,7 @@ class Challenge:
 	@property
 	def sock_timeout(self):
 		"""
-		Retrives the challenge's socket timeout
+		Retrieves the challenge's socket timeout
 		
 		Returns:
 			float: The number of seconds it takes for the 
@@ -200,7 +200,7 @@ class Challenge:
 
 
 class CTF:
-	""" A clas which handles multiple CTFs
+	""" A class which handles multiple CTFs
 	"""
 	
 	def __init__(self):
