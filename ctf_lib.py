@@ -1,28 +1,29 @@
 import socket
 import threading
 
-class Challenge():
-	""" The base class of the library, represents a single ctf challange
+
+class Challenge:
+	""" The base class of the library, represents a single ctf challenge
 	"""
-	__challenge_count=0		# challenge count for id determination
+	__challenge_count = 0		# challenge count for id determination
 	
 	def __init__(self, name, pts, port, flag, win_func, ip="127.0.0.1",
-				 sock_timeout=0.5):
+														sock_timeout=0.5):
 		"""
 		Constructor for a challenge
 		
 		Args:
-			param1 (str): A name for the challenge. Preferably unique.
-			param2 (int): The number of points awarded for completing
+			name (str): A name for the challenge. Preferably unique.
+			pts (int): The number of points awarded for completing
 				the challenge.
-			param3 (int): Port which contains the challenge
-			param4 (str): The challenge's flag
-			param5 (:obj:function(:obj: socket) returns 'bool'): Win
+			port (int): Port which contains the challenge
+			flag (str): The challenge's flag
+			win_func (function(:obj: socket) returns 'bool'): Win
 				function. Gets a client socket (with which to
 				communicate) and returns a boolean representing whether
 				the flag should be sent back or not.
-			param6 (str): The servers ip. Defaults to "127.0.0.1".
-			param7 (float): Timeout for listening for connections. Acts
+			ip (str): The servers ip. Defaults to "127.0.0.1".
+			sock_timeout (float): Timeout for listening for connections. Acts
 				as cycle time for checking if the challenge got closed.
 				Defaults to 0.5.
 		"""
@@ -40,8 +41,7 @@ class Challenge():
 		else:
 			raise TypeError('sock_timeout must be positive')
 
-		self.__challenge = threading.Thread(target=
-											self.__start_challenge)
+		self.__challenge = threading.Thread(target=self.__start_challenge)
 		self.__is_stopped = False
 
 	def start_challenge(self):
@@ -54,10 +54,10 @@ class Challenge():
 
 	def __handle_client(self, client_sock, address):
 		if self.__win_func(client_sock):
-			print "[*] %s won! Giving flag [*]" %address[0]
+			print "[*] %s won! Giving flag [*]" % address[0]
 			client_sock.send(self.__flag + "\n")
 		else:
-			print "[*] %s didn't win [*]" %address[0]
+			print "[*] %s didn't win [*]" % address[0]
 		client_sock.close()
 
 	def __start_challenge(self):
@@ -69,13 +69,13 @@ class Challenge():
 			try:
 				server_sock.listen(1)
 				client_sock, address = server_sock.accept()
-				print "[*] %s conected [*]" %address[0]
-				threading.Thread(target=self.__handle_client,
-								 args=(client_sock, address,)).start()
+				print "[*] %s conected [*]" % address[0]
+				threading.Thread(target=self.__handle_client, args=(
+					client_sock, address,)).start()
 			except socket.timeout:
 				pass
 			except Exception as e:
-				print "[*] Exception (%d) [*]" %e.errorno
+				print "[*] Exception (%s) [*]" % e.message
 				self.stop_challenge()
 	
 		print "[*] Goodbye! [*]"
@@ -117,13 +117,13 @@ class Challenge():
 		"""
 		return self.__name
 	
-	@pts.setter
+	@name.setter
 	def name(self, name):
 		"""
 		Renames the challenge
 		
 		Args:
-			param1 (str): The new name
+			name (str): The new name
 		"""
 		self.__name = name
 	
@@ -143,13 +143,12 @@ class Challenge():
 		Resets the challenge's points
 		
 		Args:
-			param1 (int): The new amount of points awarded by the
-			challenge
+			pts (int): The new amount of points awarded by the challenge
 		"""
 		self.__pts = pts
 	
 	@property
-	def port(self)
+	def port(self):
 		"""
 		Retrives the challenge's port
 		
@@ -198,3 +197,11 @@ class Challenge():
 			server to check again for a server close
 		"""
 		return self.__timeout
+
+
+class CTF:
+	""" A clas which handles multiple CTFs
+	"""
+	
+	def __init__(self):
+		pass
