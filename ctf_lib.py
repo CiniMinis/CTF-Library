@@ -55,7 +55,10 @@ class Challenge:
 		self.__challenge.start()
 
 	def __handle_client(self, client_sock, address):
+		client_sock.settimeout(None)
+		client_sock.send("Welcome to " + self.name + "\n")
 		if self.__win_func(client_sock, address[0]):
+			client_sock.send("Congrats! The flag is:")
 			if self.__unique_flag:
 				md5 = hashlib.md5(self.__flag + address[0]).hexdigest()
 				client_sock.send(md5 + "\n")
@@ -192,6 +195,14 @@ class Challenge:
 		"""
 		return self.__unique_flag
 
+	def __lt__(self, other):
+		"""
+		A comparison function for the sorted operation
+		:param other: a challenge to which we compare
+		:return: True if this challenge's points are fewer than other's
+		"""
+		return self.pts < other.pts
+
 
 class User:
 	"""User class used to hold data about users, users are unique to ips in
@@ -258,6 +269,14 @@ class User:
 		"""
 		self.__name = new
 
+	def did_solve(self, challenge):
+		"""
+		checks if a challenge is solved
+		:param challenge: the challenge to be checked
+		:return: True if the challenge was solved by the user, False otherwise
+		"""
+		return challenge in self.__solved
+
 	def __lt__(self, other):
 		"""
 		a comparison function for the sorted function
@@ -294,10 +313,10 @@ class CTF:
 			self.add_challenge(challenge)
 		if main_port is not None:
 			if shell_func is None:
-				self.add_challenge(Challenge("Menu Shell", 0, main_port, "flag",
+				self.add_challenge(Challenge("CTF Shell", 0, main_port, "flag",
 																self.__shell))
 			else:
-				self.add_challenge(Challenge("Menu Shell", 0, main_port, "flag",
+				self.add_challenge(Challenge("CTF Shell", 0, main_port, "flag",
 												shell_func))
 		self.__main_port = main_port
 		self.__users = {}
@@ -402,7 +421,6 @@ class CTF:
 	def __shell(self, client_sock, ip):		# stopped working here
 		if ip not in self.__users.iterkeys():
 			self.__users[ip] = User(ip)
-		client_sock.send("Welcome to the CTF Shell!\n")
 		client_sock.settimeout(None)
 		while self.__is_active:
 			buff = client_sock.recv(1024).replace("\n", " ")
@@ -428,11 +446,21 @@ class CTF:
 					client_sock.send("Renamed to %s\n" % self.__users[ip].name)
 				else:
 					client_sock.send("Usage: rename new_name\n")
+			elif cmd == "challenges":
+				challenge_str = "Challenges:\n"
+				for chlg in sorted(self.__challenges.values()):
+					challenge_str += "%s: %d points at port %d." % (
+						chlg.name, chlg.pts, chlg.port)
+					if self.__users[ip].did_solve(chlg):
+						challenge_str += " (Solved)"
+					challenge_str += "\n"
+				client_sock.send(challenge_str)
 			elif cmd == "exit":
 				return False
 			elif cmd == "help":
 				client_sock.send("solve - submits a challenge flag\n")
 				client_sock.send("points - shows how many points you have\n")
+				client_sock.send("challenges - displays all challenges\n")
 				client_sock.send("whoami - displays your name in the ctf\n")
 				client_sock.send("rename - sets your name in the ctf\n")
 				client_sock.send("exit - exits the shell\n")
