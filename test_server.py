@@ -17,7 +17,7 @@ ctf.add_challenge(challenge3)
 ctf.start_by_name(challenge3.name)
 
 while "stop" != raw_input().lower():
-	pass
+	print ctf.leader_board
 
 ctf.stop_by_name(challenge1.name)
 ctf.stop_all()

@@ -15,18 +15,17 @@ class Challenge:
 		Constructor for a challenge
 		
 		Args:
-			name (str): A name for the challenge. Preferably unique.
-			pts (int): The number of points awarded for completing
+		:param name: A name for the challenge. Preferably unique.
+		:param pts: The number of points awarded for completing
 				the challenge.
-			port (int): Port which contains the challenge
-			flag (str): The challenge's flag
-			win_func (function(:obj: socket, :str: ip) returns 'bool'): Win
-				function. Gets a client socket (with which to
+		:param port: Port which contains the challenge
+		:param flag: The challenge's flag
+		:param win_func: Win function. Gets a client socket (with which to
 				communicate) and the client's ip and returns a boolean
 				representing whether
 				the flag should be sent back or not.
-			unique_flag (bool): if True generates unique flags per ip
-			sock_timeout (float): Timeout for listening for connections. Acts
+		:param unique_flag: if True generates unique flags per ip
+		:param sock_timeout: Timeout for listening for connections. Acts
 				as cycle time for checking if the challenge got closed.
 				Defaults to 0.5.
 		"""
@@ -96,9 +95,8 @@ class Challenge:
 	def is_running(self):
 		"""
 		Checks the challenge state
-		
-		Returns:
-			True if currently running, False if stopped.
+
+		:return:	True if currently running, False if stopped.
 		"""
 		return not self.__is_stopped
 	
@@ -106,9 +104,8 @@ class Challenge:
 	def id(self):
 		"""
 		Retrieves the challenge id
-		
-		Returns:
-			int: The challenge id
+
+		:return: The challenge id
 		"""
 		return self.__id
 	
@@ -116,9 +113,8 @@ class Challenge:
 	def name(self):
 		"""
 		Retrieves the challenge's name
-		
-		Returns:
-			str: The challenge's name
+
+		:return: The challenge's name
 		"""
 		return self.__name
 	
@@ -126,9 +122,8 @@ class Challenge:
 	def name(self, name):
 		"""
 		Renames the challenge
-		
-		Args:
-			name (str): The new name
+
+		:param name: The new name
 		"""
 		self.__name = name
 	
@@ -136,9 +131,8 @@ class Challenge:
 	def pts(self):
 		"""
 		Retrieves the challenge's points
-		
-		Returns:
-			int: The point worth of the challenge
+
+		:return: The point worth of the challenge
 		"""
 		return self.__pts
 	
@@ -146,9 +140,8 @@ class Challenge:
 	def pts(self, pts):
 		"""
 		Resets the challenge's points
-		
-		Args:
-			pts (int): The new amount of points awarded by the challenge
+
+		:param pts: The new amount of points awarded by the challenge
 		"""
 		self.__pts = pts
 	
@@ -156,9 +149,8 @@ class Challenge:
 	def port(self):
 		"""
 		Retrieves the challenge's port
-		
-		Returns:
-			int: The port on which the challenge is hosted
+
+		:return: The port on which the challenge is hosted
 		"""
 		return self.__port
 	
@@ -168,7 +160,7 @@ class Challenge:
 		Retrieves the challenge's flag
 		
 		Returns:
-			str: The flag required to beat the challenge
+		:return: The flag required to beat the challenge
 		"""
 		return self.__flag
 		
@@ -176,9 +168,8 @@ class Challenge:
 	def win_func(self):
 		"""
 		Retrieves the challenge's main function
-		
-		Returns:
-			function: The function with which players play
+
+		:return: The function with which players play
 		"""
 		return self.__win_func
 	
@@ -186,9 +177,8 @@ class Challenge:
 	def sock_timeout(self):
 		"""
 		Retrieves the challenge's socket timeout
-		
-		Returns:
-			float: The number of seconds it takes for the 
+
+		:return: The number of seconds it takes for the
 			server to check again for a server close
 		"""
 		return self.__timeout
@@ -198,21 +188,32 @@ class Challenge:
 		"""
 		Retrieves the challenge's unique_flag boolean
 
-		Returns:
-			bool: True if the challenge generates unique flags, False Otherwise
+		:return: True if the challenge generates unique flags, False Otherwise
 		"""
 		return self.__unique_flag
 
 
 class User:
-	"""User class used to hold data
+	"""User class used to hold data about users, users are unique to ips in
+	this model
 	"""
 	def __init__(self, ip, name="User"):
+		"""
+		Creates a new User
+		:param ip: the ip from which the user is connected
+		:param name: the users given name, defaults to 'User'
+		"""
 		self.__solved = []
 		self.__ip = ip
 		self.__name = name
 
 	def solve(self, challenge, attempt):
+		"""
+		attempts to solve a challenge
+		:param challenge: the challenge which is attempted to be solved
+		:param attempt: the given flag
+		:return: True if solved, False otherwise
+		"""
 		if challenge.unique_flag:
 			answer = hashlib.md5(challenge.flag + self.__ip).hexdigest()
 		else:
@@ -224,6 +225,10 @@ class User:
 
 	@property
 	def points(self):
+		"""
+		The points scored by the user
+		:return: the amount of points the user gained in the ctf session
+		"""
 		pts = 0
 		for challenge in self.__solved:
 			pts += challenge.pts
@@ -231,28 +236,53 @@ class User:
 
 	@property
 	def ip(self):
+		"""
+		The user's ip
+		:return: the ip from which the user connected
+		"""
 		return self.__ip
 
 	@property
 	def name(self):
+		"""
+		The name the user holds
+		:return: the user's name
+		"""
 		return self.__name
 
 	@name.setter
 	def name(self, new):
+		"""
+		Renames the user
+		:param new: the new name
+		"""
 		self.__name = new
 
 	def __lt__(self, other):
+		"""
+		a comparison function for the sorted function
+		:param other: the other user to which we comapre
+		:return: true if this user has fewer points, false otherwise
+		"""
 		return self.points < other.points
-
-	def __str__(self):
-		return "%s(%s) with %d points" % (self.__name, self.__ip, self.points)
 
 
 class CTF:
 	""" A class which handles multiple CTFs
 	"""
 	
-	def __init__(self, challenges=None, main_port=None, unique_flag=None):
+	def __init__(self, challenges=None, main_port=None, shell_func=None,
+				 unique_flag=None):
+		"""
+		A constructor for a ctf
+		:param challenges: A list of challenges handled by the ctf
+		:param main_port: A port reserved for a shell menu. If set, runs a
+		shell menu in the given port.
+		:param shell_func: A function which should replace the default shell.
+		If not set, runs a default shell.
+		:param unique_flag: if set, forces all challenges given to the ctf to
+		have the same unique flag attribute.
+		"""
 		self.__challenges = {}
 		if challenges is None:
 			return
@@ -263,39 +293,66 @@ class CTF:
 				raise (TypeError, "challenge unique flag doesn't match")
 			self.add_challenge(challenge)
 		if main_port is not None:
-			self.add_challenge(Challenge("Menu Shell", 0, main_port, "flag",
-											self.__shell))
+			if shell_func is None:
+				self.add_challenge(Challenge("Menu Shell", 0, main_port, "flag",
+																self.__shell))
+			else:
+				self.add_challenge(Challenge("Menu Shell", 0, main_port, "flag",
+												shell_func))
 		self.__main_port = main_port
 		self.__users = {}
 		self.__is_active = False
 
 	def get(self, challenge_id):
+		"""
+		returns the challenge from the ctf by its ID
+		:param challenge_id: the id of the searched challenge
+		:return: the requested challenge object
+		"""
 		try:
 			return self.__challenges[challenge_id]
 		except KeyError:
 			return None
 
 	def start_all(self):
+		"""
+		starts all challenges in the ctf
+		"""
 		self.__is_active = True
 		for challenge in self.__challenges.itervalues():
 			challenge.start_challenge()
 
 	def stop_all(self):
+		"""
+		stops all challenges in the ctf
+		"""
 		self.__is_active = False
 		for challenge in self.__challenges.itervalues():
 			challenge.stop_challenge()
 
 	def start_challenge(self, challenge_id):
+		"""
+		starts a specific challenge
+		:param challenge_id: the id of the challenge to be started
+		"""
 		self.__is_active = True
 		if self.get(challenge_id) is not None:
 			self.get(challenge_id).start_challenge()
 
 	def start_by_name(self, name):
+		"""
+		starts a specific challenge
+		:param name: the name of the challenge to be started
+		"""
 		challenge_id = self.id_by_name(name)
 		if challenge_id is not None:
 			self.start_challenge(challenge_id)
 
 	def stop_challenge(self, challenge_id):
+		"""
+		stops a specific challenge
+		:param challenge_id: the id of the challenge to be stopped
+		"""
 		if self.get(challenge_id) is not None:
 			self.get(challenge_id).stop_challenge()
 		for challenge in self.__challenges.itervalues():
@@ -304,14 +361,27 @@ class CTF:
 		self.__is_active = False
 
 	def stop_by_name(self, name):
+		"""
+		stops a specific challenge
+		:param name: the name of the challenge to be stopped
+		"""
 		challenge_id = self.id_by_name(name)
 		if challenge_id is not None:
 			self.stop_challenge(challenge_id)
 
 	def add_challenge(self, challenge):
+		"""
+		adds a challenge to be managed by the ctf
+		:param challenge: the challenge to be added
+		"""
 		self.__challenges[challenge.id] = challenge
 
 	def id_by_name(self, name):
+		"""
+		gets a challenge's id by its name. works for challenges in the ctf.
+		:param name: the name of the challenge
+		:return: the id of said challenge
+		"""
 		for challenge in self.__challenges.itervalues():
 			if challenge.name == name:
 				return challenge.id
@@ -332,7 +402,7 @@ class CTF:
 	def __shell(self, client_sock, ip):		# stopped working here
 		if ip not in self.__users.iterkeys():
 			self.__users[ip] = User(ip)
-		client_sock.send("Welcome to the CTF! What would you like to do?\n")
+		client_sock.send("Welcome to the CTF Shell!\n")
 		client_sock.settimeout(None)
 		while self.__is_active:
 			buff = client_sock.recv(1024).replace("\n", " ")
@@ -360,19 +430,34 @@ class CTF:
 					client_sock.send("Usage: rename new_name\n")
 			elif cmd == "exit":
 				return False
+			elif cmd == "help":
+				client_sock.send("solve - submits a challenge flag\n")
+				client_sock.send("points - shows how many points you have\n")
+				client_sock.send("whoami - displays your name in the ctf\n")
+				client_sock.send("rename - sets your name in the ctf\n")
+				client_sock.send("exit - exits the shell\n")
 			else:
-				client_sock.send("Excuse me, what?\n")
+				client_sock.send("Excuse me, what?\nTry the help command!\n")
 
 	@property
 	def is_active(self):
+		"""
+		gets the ctf status
+		:return: True if at least one challenge is active, False otherwise.
+		"""
 		return self.__is_active
 
 	@property
 	def leader_board(self):
+		"""
+		a string representing the total score
+		:return: the ctf rankings
+		"""
 		score = sorted(self.__users.itervalues())
 		board = "Leader Board:\n"
-		for rank, user in enumerate(score):
-			board = board + "%d) %s" % (rank+1, str(user))
+		for rank, user in enumerate(score[::-1]):
+			board = board + "%d) %s(%s) - %d\n" % (rank+1, user.name, user.ip,
+													user.points)
 		return board
 
 
