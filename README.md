@@ -11,7 +11,7 @@ The test_server.py file shows an example of general usage of the library.
 For further questions, feel free to contact me (CiniMinis).
 
 ## Future Plans
-[x] Add stats to ctf servers
-[ ] Further abstract socket usage in challenge functions
-[ ] Simplify new shell functions
-[ ] Add support for a website front instead of the shell
+ - [x] Add stats to ctf servers
+ - [ ] Further abstract socket usage in challenge functions
+ - [ ] Simplify new shell functions
+ - [ ] Add support for a website front instead of the shell
