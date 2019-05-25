@@ -303,6 +303,7 @@ class CTF:
 		have the same unique flag attribute.
 		"""
 		self.__challenges = {}
+		self.__stats = {}
 		if challenges is None:
 			return
 		for challenge in challenges:
@@ -395,6 +396,7 @@ class CTF:
 		:param challenge: the challenge to be added
 		"""
 		self.__challenges[challenge.id] = challenge
+		self.__stats[challenge.name] = 0
 
 	def id_by_name(self, name):
 		"""
@@ -425,6 +427,7 @@ class CTF:
 			self.__score.append(self.__users[ip])
 			self.__score = sorted(self.__score)
 		client_sock.send("ctf\\shell>")
+		client_sock.settimeout(0.5)
 		while self.__is_active:
 			try:
 				buff = client_sock.recv(1024).replace("\n", " ")
@@ -436,6 +439,7 @@ class CTF:
 				if len(buff.split(" "))-1 == 3:
 					if self.__solve(ip, buff.split(" ")[1], buff.split(" ")[2]):
 						self.__score = sorted(self.__score)
+						self.__stats[buff.split(" ")[1]] += 1
 						client_sock.send("Challenge Solved!\n")
 					else:
 						client_sock.send("Solve Failed!\n")
@@ -496,6 +500,25 @@ class CTF:
 													user.points)
 		return board
 
+	def solvers(self, challenge):
+		"""
+		gets the stat of how many people solved the challenge
+		:param challenge: the challenge which is queried
+		:return: how many people solved the challenge
+		"""
+		return self.__stats[challenge.name]
+
+	@property
+	def stats(self):
+		"""
+		gets the solve stats of all challenges
+		:return: a formatted string displaying the stats of all challenges
+		"""
+		stats = "Challenge Stats:\n"
+		for challenge in self.__challenges.values():
+			stats += "%s: %d solves\n" % (challenge.name,
+											self.solvers(challenge))
+		return stats
 
 
 
