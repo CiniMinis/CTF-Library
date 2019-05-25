@@ -423,6 +423,7 @@ class CTF:
 			self.__users[ip] = User(ip)
 		client_sock.settimeout(None)
 		while self.__is_active:
+			client_sock.send("ctf\\shell>")
 			buff = client_sock.recv(1024).replace("\n", " ")
 			cmd = buff.split(" ")[0].lower()
 			print "\"" + cmd + "\""
@@ -447,8 +448,8 @@ class CTF:
 				else:
 					client_sock.send("Usage: rename new_name\n")
 			elif cmd == "challenges":
-				challenge_str = "Challenges:\n"
-				for chlg in sorted(self.__challenges.values()):
+				challenge_str = ""
+				for chlg in sorted(self.__challenges.values())[1:]:
 					challenge_str += "%s: %d points at port %d." % (
 						chlg.name, chlg.pts, chlg.port)
 					if self.__users[ip].did_solve(chlg):
@@ -456,6 +457,7 @@ class CTF:
 					challenge_str += "\n"
 				client_sock.send(challenge_str)
 			elif cmd == "exit":
+				client_sock.send("Goodbye!")
 				return False
 			elif cmd == "help":
 				client_sock.send("solve - submits a challenge flag\n")
