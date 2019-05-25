@@ -321,6 +321,7 @@ class CTF:
 		self.__main_port = main_port
 		self.__users = {}
 		self.__is_active = False
+		self.__score = []
 
 	def get(self, challenge_id):
 		"""
@@ -421,15 +422,20 @@ class CTF:
 	def __shell(self, client_sock, ip):		# stopped working here
 		if ip not in self.__users.iterkeys():
 			self.__users[ip] = User(ip)
-		client_sock.settimeout(None)
+			self.__score.append(self.__users[ip])
+			self.__score = sorted(self.__score)
+		client_sock.send("ctf\\shell>")
 		while self.__is_active:
-			client_sock.send("ctf\\shell>")
-			buff = client_sock.recv(1024).replace("\n", " ")
+			try:
+				buff = client_sock.recv(1024).replace("\n", " ")
+			except socket.error:
+				continue
 			cmd = buff.split(" ")[0].lower()
 			print "\"" + cmd + "\""
 			if cmd == "solve":
 				if len(buff.split(" "))-1 == 3:
 					if self.__solve(ip, buff.split(" ")[1], buff.split(" ")[2]):
+						self.__score = sorted(self.__score)
 						client_sock.send("Challenge Solved!\n")
 					else:
 						client_sock.send("Solve Failed!\n")
@@ -468,6 +474,7 @@ class CTF:
 				client_sock.send("exit - exits the shell\n")
 			else:
 				client_sock.send("Excuse me, what?\nTry the help command!\n")
+			client_sock.send("ctf\\shell>")
 
 	@property
 	def is_active(self):
@@ -483,9 +490,8 @@ class CTF:
 		a string representing the total score
 		:return: the ctf rankings
 		"""
-		score = sorted(self.__users.itervalues())
 		board = "Leader Board:\n"
-		for rank, user in enumerate(score[::-1]):
+		for rank, user in enumerate(self.__score[::-1]):
 			board = board + "%d) %s(%s) - %d\n" % (rank+1, user.name, user.ip,
 													user.points)
 		return board
